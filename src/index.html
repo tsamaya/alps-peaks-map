@@ -1,0 +1,155 @@
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <title>Alps Peaks Map</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <!-- Load Leaflet and plugin CSS from CDN-->
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <link rel="stylesheet" type="text/css" href="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.3/esri-leaflet-geocoder.css">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.css">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.Default.css">
+    <!-- app css -->
+    <style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 80%;
+    }
+    #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+    }
+    #basemaps-wrapper {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        background: white;
+        padding: 10px;
+    }
+    #basemaps {
+        margin-bottom: 5px;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div id="basemaps-wrapper" class="leaflet-bar">
+        Basemap:
+        <select name="basemaps" id="basemaps">
+            <option value="Topographic">Topographic</option>
+            <option value="Imagery">Imagery</option>
+            <option value="Terrain">Terrain</option>
+            <option value="NationalGeographic">National Geographic</option>
+            <option value="Streets">Streets</option>
+        </select>
+    </div>
+    <!-- Load Leaflet and plugins from CDN -->
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
+    <script src="http://rawgit.com/calvinmetcalf/leaflet-ajax/master/dist/leaflet.ajax.min.js"></script>
+    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.3/esri-leaflet-geocoder.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster.js"></script>
+    <!-- app script -->
+    <script>
+    (function(L) {
+        // init map w/ basemap
+        var map = L.map('map').setView([45.2144,5.8074], 6);
+        var basemapLayer = L.esri.basemapLayer('Topographic').addTo(map);
+        var basemapDropdown = document.getElementById('basemaps');
+        var basemapLabelsLayer;
+
+        var mountainsIcon = L.icon({
+            iconUrl: './images/mountainMarker.png',
+            iconSize: [25, 41],
+            iconAnchor: [22, 22]
+        });
+
+        var markers = L.markerClusterGroup();
+
+        // add peaks
+        var peaksGeoJSONUrl = './data/alps.geojson';
+        //var peaksGeoJSONUrl = './data/france.geojson';
+        var peaksLayer = new L.GeoJSON.AJAX(peaksGeoJSONUrl, {
+            pointToLayer: function(feature, latlng) {
+                var marker = L.marker(latlng, {
+                    icon: mountainsIcon
+                });
+                markers.addLayer(marker);
+                return marker;
+            },
+            onEachFeature: peaksPopup
+        }); //.addTo(map);
+
+        map.addLayer(markers);
+
+        // show popup for peak
+        function peaksPopup(feature, layer) {
+            var props = feature.properties
+            var content;
+            if (props) {
+                content = props.name;
+                content += '<br />' + props.meters + ' m';
+                content += '&nbsp;&nbsp;/&nbsp;&nbsp;';
+                content += props.feet + ' ft';
+                var geom = feature.geometry;
+                if (geom) {
+                    var coordinates = geom.coordinates;
+                    var NS = (coordinates[1] < 0 ? 'S' : 'N');
+                    var EW = (coordinates[0] < 0 ? 'W' : 'E');
+                    content += '<br />' + Math.abs(coordinates[1]) + '° ' + NS + ', ' + Math.abs(coordinates[0]) + '° ' + EW;
+                }
+                layer.bindPopup(content);
+            }
+        }
+
+        // TODO: add trailheads
+
+        // add geocoder
+        var searchControl = new L.esri.Controls.Geosearch({
+            zoomToResult: false,
+            allowMultipleResults: false
+        }).addTo(map);
+        searchControl.on('results', function(data) {
+            // for (var i = data.results.length - 1; i >= 0; i--) {
+            // var result = data.results[i];
+            var result = data.results[0];
+            map.panTo(result.latlng);
+            L.popup()
+                .setLatLng(result.latlng)
+                .setContent(result.text)
+                .openOn(map);
+            // };
+        });
+
+        // switch basemap and basemap label layers
+        function setBasemap(basemap) {
+            if (basemapLayer) {
+                map.removeLayer(basemapLayer);
+            }
+            basemapLayer = L.esri.basemapLayer(basemap);
+            map.addLayer(basemapLayer);
+            if (basemapLabelsLayer) {
+                map.removeLayer(basemapLabelsLayer);
+            }
+            if (basemap === 'Imagery' || basemap === 'Terrain') {
+                basemapLabelsLayer = L.esri.basemapLayer(basemap + 'Labels');
+                map.addLayer(basemapLabelsLayer);
+            }
+        }
+
+        // wire up basemap change event
+        basemapDropdown.addEventListener('change', function() {
+            setBasemap(this.value);
+        });
+    })(L);
+    </script>
+</body>
+
+</html>
