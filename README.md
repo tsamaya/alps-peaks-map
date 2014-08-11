@@ -9,7 +9,7 @@ Anyone and everyone is welcome to contribute.
 
 ## Credit
 
-This application was inspired by [@tomwayson](https://github.com/tomwayson/sierra-peaks-map).
+This application was inspired by [@tomwayson](https://github.com/tomwayson) [Sierra-Peaks-Map](https://github.com/tomwayson/sierra-peaks-map).
 
 ## Licensing
 
