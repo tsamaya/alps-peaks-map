@@ -1,0 +1,59 @@
+<html>
+
+<head></head>
+
+<body>
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script>
+    $(document).ready(function() {
+
+        var dir = "http://localhost:88/github/tsamaya/data/europe/france/";
+        var fileextension = ".geojson";
+
+        var peaksURL = [];
+        var peaks = {
+            "type": "FeatureCollection",
+            "features": []
+        };
+        $.ajax({
+            //This will retrieve the contents of the folder if the folder is configured as 'browsable'
+            url: dir,
+            success: function(data) {
+                var removeURI = window.location.pathname;
+                removeURI = removeURI.substr(0, removeURI.lastIndexOf('/'));
+
+                //Lsit all png file names in the page
+                $(data).find("a:contains(" + fileextension + ")").each(function() {
+                    //console.log(this.href);
+                    var filename = this.href.replace(removeURI, "");
+                    filename = filename.replace("http://" + window.location.host + "/", "");
+                    //$("body").append($("<a href=" + dir + filename + ">" + filename + "</a><br />"));
+                    if ("_index.geojson" != filename) {
+                        peaksURL.push(dir + filename);
+                    }
+                });
+                //console.log(peaksURL);
+                var lastIndex = peaksURL.length;
+
+                $.each(peaksURL, function(index, value) {
+                    //console.log(index + ": " + value);
+                    $.ajax({
+                        url: value,
+                        success: function(data) {
+                            console.log(data);
+                            peaks.features.push(data);
+                        }
+                    });
+                    console.log(peaks);
+
+                });
+
+            }
+        });
+
+    });
+    </script>
+    <div id='peaks'></div>
+</body>
+
+</html>
