@@ -1,79 +1,160 @@
-<!DOCTYPE html>
 <html>
 
-  <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Alps-peaks-map : A web map to help find peaks in the Alps">
+<head>
+    <meta charset=utf-8 />
+    <title>Alps Peaks Map</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <!-- Load Leaflet and plugin CSS from CDN-->
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <link rel="stylesheet" type="text/css" href="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.3/esri-leaflet-geocoder.css">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.css">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.Default.css">
+    <!-- app css -->
+    <style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 80%;
+    }
+    #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+    }
+    #basemaps-wrapper {
+        position: absolute;
+        top: 10px;
+        /*right: 10px;*/
+        left: 42px;
+        z-index: 10;
+        background: white;
+        padding: 10px;
+    }
+    #basemaps {
+        margin-bottom: 5px;
+    }
+    </style>
+</head>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Alps-peaks-map</title>
-  </head>
-
-  <body>
-
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/tsamaya/alps-peaks-map">View on GitHub</a>
-
-          <h1 id="project_title">Alps-peaks-map</h1>
-          <h2 id="project_tagline">A web map to help find peaks in the Alps</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/tsamaya/alps-peaks-map/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/tsamaya/alps-peaks-map/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h1>
-<a name="alps-peaks-map" class="anchor" href="#alps-peaks-map"><span class="octicon octicon-link"></span></a>alps-peaks-map</h1>
-
-<p>A web map to help find peaks in the Alps</p>
-
-<h2>
-<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
-
-<p>Anyone and everyone is welcome to contribute.</p>
-
-<h2>
-<a name="credit" class="anchor" href="#credit"><span class="octicon octicon-link"></span></a>Credit</h2>
-
-<p>This application was inspired by <a href="https://github.com/tomwayson">@tomwayson</a> <a href="https://github.com/tomwayson/sierra-peaks-map">Sierra-Peaks-Map</a>.</p>
-
-<h2>
-<a name="licensing" class="anchor" href="#licensing"><span class="octicon octicon-link"></span></a>Licensing</h2>
-
-<p>Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at</p>
-
-<p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
-
-<p>Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.</p>
-
-<p>A copy of the license is available in the repository's <a href="LICENSE">license</a> file.</p>
-      </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Alps-peaks-map maintained by <a href="https://github.com/tsamaya">tsamaya</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
+<body>
     
+<a href="https://github.com/tsamaya/"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 99" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
+    <div id="map"></div>
+    <div id="basemaps-wrapper" class="leaflet-bar">
+        Basemap:
+        <select name="basemaps" id="basemaps">
+            <option value="Topographic">Topographic</option>
+            <option value="Imagery">Imagery</option>
+            <option value="Terrain">Terrain</option>
+            <option value="NationalGeographic">National Geographic</option>
+            <option value="Streets">Streets</option>
+        </select>
+    </div>
+    <!-- Load Leaflet and plugins from CDN -->
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
+    <script src="http://rawgit.com/calvinmetcalf/leaflet-ajax/master/dist/leaflet.ajax.min.js"></script>
+    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.3/esri-leaflet-geocoder.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster.js"></script>
+    <!-- app script -->
+    <script>
+    (function(L) {
+        // init map w/ basemap
+        var map = L.map('map').setView([45.2144, 5.8074], 6);
+        var basemapLayer = L.esri.basemapLayer('Topographic').addTo(map);
+        var basemapDropdown = document.getElementById('basemaps');
+        var basemapLabelsLayer;
+        var peaks = [];
 
-  </body>
+        var mountainsIcon = L.icon({
+            iconUrl: './images/mountainMarker.png',
+            iconSize: [25, 41],
+            iconAnchor: [22, 22]
+        });
+
+        var markers = L.markerClusterGroup({
+            disableClusteringAtZoom: 11
+        });
+
+        // add peaks
+        var peaksGeoJSONUrl = './data/alps.geojson';
+        var peaksLayer = new L.GeoJSON.AJAX(peaksGeoJSONUrl, {
+            pointToLayer: function(feature, latlng) {
+                var marker = L.marker(latlng, {
+                    icon: mountainsIcon
+                });
+                markers.addLayer(marker);
+                return marker;
+            },
+            onEachFeature: peaksPopup
+        }); //.addTo(map);
+
+        map.addLayer(markers);
+
+        // show popup for peak
+        function peaksPopup(feature, layer) {
+            // store feature for search
+            peaks.push(feature);
+            // do popup job
+            var props = feature.properties
+            var content;
+            if (props) {
+                content = props.name;
+                content += '<br />' + props.meters + ' m';
+                content += '&nbsp;&nbsp;/&nbsp;&nbsp;';
+                content += props.feet + ' ft';
+                var geom = feature.geometry;
+                if (geom) {
+                    var coordinates = geom.coordinates;
+                    var NS = (coordinates[1] < 0 ? 'S' : 'N');
+                    var EW = (coordinates[0] < 0 ? 'W' : 'E');
+                    content += '<br />' + Math.abs(coordinates[1]) + '° ' + NS + ', ' + Math.abs(coordinates[0]) + '° ' + EW;
+                }
+                layer.bindPopup(content);
+            }
+        }
+        // add geocoder
+        var searchControl = new L.esri.Controls.Geosearch({
+            zoomToResult: false,
+            allowMultipleResults: false
+        }).addTo(map);
+        searchControl.on('results', function(data) {
+            // for (var i = data.results.length - 1; i >= 0; i--) {
+            // var result = data.results[i];
+            var result = data.results[0];
+            map.panTo(result.latlng);
+            L.popup()
+                .setLatLng(result.latlng)
+                .setContent(result.text)
+                .openOn(map);
+            // };
+        });
+
+        // switch basemap and basemap label layers
+        function setBasemap(basemap) {
+            if (basemapLayer) {
+                map.removeLayer(basemapLayer);
+            }
+            basemapLayer = L.esri.basemapLayer(basemap);
+            map.addLayer(basemapLayer);
+            if (basemapLabelsLayer) {
+                map.removeLayer(basemapLabelsLayer);
+            }
+            if (basemap === 'Imagery' || basemap === 'Terrain') {
+                basemapLabelsLayer = L.esri.basemapLayer(basemap + 'Labels');
+                map.addLayer(basemapLabelsLayer);
+            }
+        }
+
+        // wire up basemap change event
+        basemapDropdown.addEventListener('change', function() {
+            setBasemap(this.value);
+        });
+    })(L);
+    </script>
+</body>
+
 </html>
