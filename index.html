@@ -4,6 +4,7 @@
     <meta charset=utf-8 />
     <title>Alps Peaks Map</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src="./data/poi.geojson.js"></script>
     <!-- Load Leaflet and plugin CSS from CDN-->
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
     <link rel="stylesheet" type="text/css" href="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.3/esri-leaflet-geocoder.css">
@@ -36,12 +37,35 @@
     #basemaps {
         margin-bottom: 5px;
     }
+    #progress {
+        display: none;
+        position: absolute;
+        z-index: 1000;
+        left: 400px;
+        top: 300px;
+        width: 200px;
+        height: 20px;
+        margin-top: -20px;
+        margin-left: -100px;
+        background-color: #fff;
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 4px;
+        padding: 2px;
+    }
+
+    #progress-bar {
+        width: 0;
+        height: 100%;
+        background-color: #76A6FC;
+        border-radius: 4px;
+    }
     </style>
 </head>
 
 <body>
     
-<a href="https://github.com/tsamaya/"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 99" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
+<a href="https://github.com/tsamaya/"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 99" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>-
+    <div id="progress"><div id="progress-bar"></div></div>
     <div id="map"></div>
     <div id="basemaps-wrapper" class="leaflet-bar">
         Basemap:
@@ -59,15 +83,18 @@
     <script src="http://rawgit.com/calvinmetcalf/leaflet-ajax/master/dist/leaflet.ajax.min.js"></script>
     <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.3/esri-leaflet-geocoder.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster.js"></script>
+    <script src="//makinacorpus.github.io/Leaflet.Spin/spin.js/dist/spin.min.js"></script>
+    <script src="//makinacorpus.github.io/Leaflet.Spin/leaflet.spin.js"></script>
     <!-- app script -->
     <script>
     (function(L) {
         // init map w/ basemap
         var map = L.map('map').setView([45.2144, 5.8074], 6);
+        map.spin(true);
         var basemapLayer = L.esri.basemapLayer('Topographic').addTo(map);
         var basemapDropdown = document.getElementById('basemaps');
         var basemapLabelsLayer;
-        var peaks = [];
+        //var peaks = [];
 
         var mountainsIcon = L.icon({
             iconUrl: './images/mountainMarker.png',
@@ -75,30 +102,65 @@
             iconAnchor: [22, 22]
         });
 
+        var progress = document.getElementById('progress');
+        var progressBar = document.getElementById('progress-bar');
+
+        function updateProgressBar(processed, total, elapsed, layersArray) {
+          if (elapsed > 1000) {
+            // if it takes more than a second to load, display the progress bar:
+            progress.style.display = 'block';
+            progressBar.style.width = Math.round(processed/total*100) + '%';
+          }
+
+          if (processed === total) {
+            // all markers processed - hide the progress bar:
+            progress.style.display = 'none';
+          }
+        }
+
         var markers = L.markerClusterGroup({
-            disableClusteringAtZoom: 12
+            disableClusteringAtZoom: 12,
+            chunkedLoading: true,
+            chunkProgress: updateProgressBar
         });
 
-        // add peaks
-        //var peaksGeoJSONUrl = './data/alps.geojson';
-        var peaksGeoJSONUrl = './data/poi.geojson';
-        var peaksLayer = new L.GeoJSON.AJAX(peaksGeoJSONUrl, {
-            pointToLayer: function(feature, latlng) {
-                var marker = L.marker(latlng, {
+        var markerList = [];
+        for (var i = 0; i < peaksData.features.length; i++) {
+            var a = peaksData.features[i];
+            var content = peaksPopup(a);
+            var latlng = L.latLng(a.geometry.coordinates[1],a.geometry.coordinates[0]);
+            var marker = L.marker(latlng, {
                     icon: mountainsIcon
                 });
-                markers.addLayer(marker);
-                return marker;
-            },
-            onEachFeature: peaksPopup
-        }); //.addTo(map);
+            marker.bindPopup(content);
+            markerList.push(marker);
+        }
 
+
+        // add peaks
+        // //var peaksGeoJSONUrl = './data/alps.geojson';
+        // var peaksGeoJSONUrl = './data/poi.geojson';
+
+        // var peaksLayer = new L.GeoJSON.AJAX(peaksGeoJSONUrl, {
+        //     pointToLayer: function(feature, latlng) {
+        //         var marker = L.marker(latlng, {
+        //             icon: mountainsIcon
+        //         });
+        //         //markers.addLayer(marker);
+        //         markerList.push(marker);
+        //         return marker;
+        //     },
+        //     onEachFeature: peaksPopup
+        // }); //.addTo(map);
+
+        markers.addLayers(markerList);
         map.addLayer(markers);
+        map.spin(false);
 
         // show popup for peak
         function peaksPopup(feature, layer) {
             // store feature for search
-            peaks.push(feature);
+            //peaks.push(feature);
             // do popup job
             var props = feature.properties
             var content;
@@ -114,8 +176,9 @@
                     var EW = (coordinates[0] < 0 ? 'W' : 'E');
                     content += '<br />' + Math.abs(coordinates[1]) + '° ' + NS + ', ' + Math.abs(coordinates[0]) + '° ' + EW;
                 }
-                layer.bindPopup(content);
+                //layer.bindPopup(content);
             }
+            return content;
         }
         // add geocoder
         var searchControl = new L.esri.Controls.Geosearch({
