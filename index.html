@@ -83,14 +83,14 @@
     <script src="http://rawgit.com/calvinmetcalf/leaflet-ajax/master/dist/leaflet.ajax.min.js"></script>
     <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.3/esri-leaflet-geocoder.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster.js"></script>
-    <script src="//makinacorpus.github.io/Leaflet.Spin/spin.js/dist/spin.min.js"></script>
-    <script src="//makinacorpus.github.io/Leaflet.Spin/leaflet.spin.js"></script>
+    <!--<script src="//makinacorpus.github.io/Leaflet.Spin/spin.js/dist/spin.min.js"></script>
+    <script src="//makinacorpus.github.io/Leaflet.Spin/leaflet.spin.js"></script>-->
     <!-- app script -->
     <script>
     (function(L) {
         // init map w/ basemap
         var map = L.map('map').setView([45.2144, 5.8074], 6);
-        map.spin(true);
+        //map.spin(true);
         var basemapLayer = L.esri.basemapLayer('Topographic').addTo(map);
         var basemapDropdown = document.getElementById('basemaps');
         var basemapLabelsLayer;
@@ -155,7 +155,7 @@
 
         markers.addLayers(markerList);
         map.addLayer(markers);
-        map.spin(false);
+        //map.spin(false);
 
         // show popup for peak
         function peaksPopup(feature, layer) {
