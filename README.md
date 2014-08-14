@@ -4,7 +4,7 @@ alps-peaks-map
 A web map to help find peaks in the Alps.
 Data foder contains 2 geojson files:
 * **alps.geojson** coming from [@open-data/data](https://github.com/open-peaks/data)
-* **poi.geojson** coming from ?
+* **poi.geojson** coming from (?), my old hard-drive
 
 ## ToDo List
 - search peaks, lakes, and passes
