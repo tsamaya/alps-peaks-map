@@ -76,11 +76,12 @@
         });
 
         var markers = L.markerClusterGroup({
-            disableClusteringAtZoom: 11
+            disableClusteringAtZoom: 12
         });
 
         // add peaks
-        var peaksGeoJSONUrl = './data/alps.geojson';
+        //var peaksGeoJSONUrl = './data/alps.geojson';
+        var peaksGeoJSONUrl = './data/poi.geojson';
         var peaksLayer = new L.GeoJSON.AJAX(peaksGeoJSONUrl, {
             pointToLayer: function(feature, latlng) {
                 var marker = L.marker(latlng, {

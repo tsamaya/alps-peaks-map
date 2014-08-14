@@ -36,4 +36,10 @@ Icon
 .Spotlight-V100
 .Trashes
 
+# temp dirs
 tmp
+temp
+
+# Sublime-Text
+*.sublime-workspace
+*.sublime-project

@@ -1,0 +1,15 @@
+
+remove bbbox
+,\n+.+"bbox": ((?!\]).|\n)+\]
+
+
+remove decimal
+14 ou 15 décimale
+12.43500000000006
+
+000000\d\d,
+par
+,
+
+000000\d\d\
+par rien !

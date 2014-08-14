@@ -1,11 +1,22 @@
 alps-peaks-map
 ================
 
-A web map to help find peaks in the Alps
+A web map to help find peaks in the Alps.
+
+
+## Issues
+
+Find a bug or want to request a new feature?  Please let us know by submitting an issue.
 
 ## Contributing
 
 Anyone and everyone is welcome to contribute.
+
+## Resources
+
+* [leaflet](http://leafletjs.com/)
+* [esri leaflet](http://esri.github.io/esri-leaflet)
+* twitter [@arferrand](http://twitter.com/arferrand)
 
 ## Credit
 
