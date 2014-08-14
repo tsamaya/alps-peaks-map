@@ -8,7 +8,7 @@ Data foder contains 2 geojson files:
 
 ## ToDo List
 - search peaks, lakes, and passes
-- optimize loading and display with 15000 poi.
+- optimize loading and displaying with 15000 poi.
 
 ## Issues
 
