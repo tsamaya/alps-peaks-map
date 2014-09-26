@@ -4,12 +4,7 @@
     <meta charset=utf-8 />
     <title>Alps Peaks Map</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src="./data/poi.geojson.js"></script>
     <!-- Load Leaflet and plugin CSS from CDN-->
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-    <link rel="stylesheet" type="text/css" href="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.3/esri-leaflet-geocoder.css">
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.css">
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.Default.css">
     <!-- app css -->
     <style>
     body {
@@ -18,207 +13,21 @@
         font-family: Helvetica, Arial, sans-serif;
         font-size: 80%;
     }
-    #map {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        left: 0;
-    }
-    #basemaps-wrapper {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        /*left: 42px;*/
-        z-index: 10;
-        background: white;
-        padding: 10px;
-    }
-    #basemaps {
-        margin-bottom: 5px;
-    }
-    #progress {
-        display: none;
-        position: absolute;
-        z-index: 1000;
-        left: 400px;
-        top: 300px;
-        width: 200px;
-        height: 20px;
-        margin-top: -20px;
-        margin-left: -100px;
-        background-color: #fff;
-        background-color: rgba(255, 255, 255, 0.7);
-        border-radius: 4px;
-        padding: 2px;
-    }
-
-    #progress-bar {
-        width: 0;
-        height: 100%;
-        background-color: #76A6FC;
-        border-radius: 4px;
-    }
     </style>
 </head>
 
 <body>
-    <!-- gh-pages
-<a href="https://github.com/tsamaya/"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 99" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>-->
-    <div id="progress"><div id="progress-bar"></div></div>
-    <div id="map"></div>
-    <div id="basemaps-wrapper" class="leaflet-bar">
-        Basemap:
-        <select name="basemaps" id="basemaps">
-            <option value="Topographic">Topographic</option>
-            <option value="Imagery">Imagery</option>
-            <option value="Terrain">Terrain</option>
-            <option value="NationalGeographic">National Geographic</option>
-            <option value="Streets">Streets</option>
-        </select>
-    </div>
-    <!-- Load Leaflet and plugins from CDN -->
-    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
-    <script src="http://rawgit.com/calvinmetcalf/leaflet-ajax/master/dist/leaflet.ajax.min.js"></script>
-    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.3/esri-leaflet-geocoder.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster.js"></script>
-    <script src="//makinacorpus.github.io/Leaflet.Spin/spin.js/dist/spin.min.js"></script>
-    <script src="//makinacorpus.github.io/Leaflet.Spin/leaflet.spin.js"></script>
-    <!-- app script -->
-    <script>
-    (function(L) {
-        // init map w/ basemap
-        var map = L.map('map').setView([45.2144, 5.8074], 6);
-        map.spin(true);
-        var basemapLayer = L.esri.basemapLayer('Topographic').addTo(map);
-        var basemapDropdown = document.getElementById('basemaps');
-        var basemapLabelsLayer;
-        //var peaks = [];
 
-        var mountainsIcon = L.icon({
-            iconUrl: './images/mountainMarker.png',
-            iconSize: [25, 41],
-            iconAnchor: [22, 22]
-        });
-
-        var progress = document.getElementById('progress');
-        var progressBar = document.getElementById('progress-bar');
-
-        function updateProgressBar(processed, total, elapsed, layersArray) {
-          if (elapsed > 1000) {
-            // if it takes more than a second to load, display the progress bar:
-            progress.style.display = 'block';
-            progressBar.style.width = Math.round(processed/total*100) + '%';
-          }
-
-          if (processed === total) {
-            // all markers processed - hide the progress bar:
-            progress.style.display = 'none';
-          }
-        }
-
-        var markers = L.markerClusterGroup({
-            disableClusteringAtZoom: 12,
-            chunkedLoading: true,
-            chunkProgress: updateProgressBar
-        });
-
-        var markerList = [];
-        for (var i = 0; i < peaksData.features.length; i++) {
-            var a = peaksData.features[i];
-            var content = peaksPopup(a);
-            var latlng = L.latLng(a.geometry.coordinates[1],a.geometry.coordinates[0]);
-            var marker = L.marker(latlng, {
-                    icon: mountainsIcon
-                });
-            marker.bindPopup(content);
-            markerList.push(marker);
-        }
-
-
-        // add peaks
-        // //var peaksGeoJSONUrl = './data/alps.geojson';
-        // var peaksGeoJSONUrl = './data/poi.geojson';
-
-        // var peaksLayer = new L.GeoJSON.AJAX(peaksGeoJSONUrl, {
-        //     pointToLayer: function(feature, latlng) {
-        //         var marker = L.marker(latlng, {
-        //             icon: mountainsIcon
-        //         });
-        //         //markers.addLayer(marker);
-        //         markerList.push(marker);
-        //         return marker;
-        //     },
-        //     onEachFeature: peaksPopup
-        // }); //.addTo(map);
-
-        markers.addLayers(markerList);
-        map.addLayer(markers);
-        map.spin(false);
-
-        // show popup for peak
-        function peaksPopup(feature, layer) {
-            // store feature for search
-            //peaks.push(feature);
-            // do popup job
-            var props = feature.properties
-            var content;
-            if (props) {
-                content = props.name;
-                content += '<br />' + props.meters + ' m';
-                content += '&nbsp;&nbsp;/&nbsp;&nbsp;';
-                content += props.feet + ' ft';
-                var geom = feature.geometry;
-                if (geom) {
-                    var coordinates = geom.coordinates;
-                    var NS = (coordinates[1] < 0 ? 'S' : 'N');
-                    var EW = (coordinates[0] < 0 ? 'W' : 'E');
-                    content += '<br />' + Math.abs(coordinates[1]) + '° ' + NS + ', ' + Math.abs(coordinates[0]) + '° ' + EW;
-                }
-                //layer.bindPopup(content);
-            }
-            return content;
-        }
-        // add geocoder
-        var searchControl = new L.esri.Controls.Geosearch({
-            zoomToResult: false,
-            allowMultipleResults: false
-        }).addTo(map);
-        searchControl.on('results', function(data) {
-            // for (var i = data.results.length - 1; i >= 0; i--) {
-            // var result = data.results[i];
-            var result = data.results[0];
-            map.panTo(result.latlng);
-            L.popup()
-                .setLatLng(result.latlng)
-                .setContent(result.text)
-                .openOn(map);
-            // };
-        });
-
-        // switch basemap and basemap label layers
-        function setBasemap(basemap) {
-            if (basemapLayer) {
-                map.removeLayer(basemapLayer);
-            }
-            basemapLayer = L.esri.basemapLayer(basemap);
-            map.addLayer(basemapLayer);
-            if (basemapLabelsLayer) {
-                map.removeLayer(basemapLabelsLayer);
-            }
-            if (basemap === 'Imagery' || basemap === 'Terrain') {
-                basemapLabelsLayer = L.esri.basemapLayer(basemap + 'Labels');
-                map.addLayer(basemapLabelsLayer);
-            }
-        }
-
-        // wire up basemap change event
-        basemapDropdown.addEventListener('change', function() {
-            setBasemap(this.value);
-        });
-    })(L);
-    </script>
+<a href="https://github.com/tsamaya/alps-peaks-map"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 99" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
+<div >
+  A web map to help find peaks in the Alps.
+  <br />
+  <ul>
+  <li>Version <a href="leaftlet.html">Leaflet</a> using esri-leaflet plugin</li>
+  <br />
+  <li>Version <a href="esri.html">API arcgis for JS</a> Point clustering has been implemented in this sample with a custom layer named extras.ClusterLayer.</li>
+  </ul>
+</div>
 </body>
 
 </html>
