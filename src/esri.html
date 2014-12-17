@@ -96,7 +96,7 @@
             var wgs = new SpatialReference({
               "wkid": 4326
             });
-            photoInfo.data = arrayUtils.map(resp, function(p) {
+            photoInfo.data = arrayUtils.map(resp.features, function(p) {
               var latlng = new  Point(parseFloat(p.geometry.x), parseFloat(p.geometry.y), wgs);
               var webMercator = webMercatorUtils.geographicToWebMercator(latlng);
               iPeaks++;
@@ -120,7 +120,7 @@
                 "label": "Name",
                 visible: true
               }, {
-                "fieldName": "Elevation",
+                "fieldName": "POI_ST_NUM",
                 "label": "Elevation (m)",
                 visible: true
               }]
